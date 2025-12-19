@@ -1,16 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
     <script
   type="text/javascript"
   src="https://pl28080970.effectivegatecpm.com/8d/fa/d1/8dfad1c4b5d698a97747465b058473a1.js"
 ></script>
-    <script
-  async="async"
-  data-cfasync="false"
-  src="https://pl28087364.effectivegatecpm.com/5f0b65d762714132d66c6ba8945349f3/invoke.js"
-></script>
-<div id="container-5f0b65d762714132d66c6ba8945349f3"></div>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Earning App</title>
@@ -377,26 +371,63 @@
             </section>
 
             <section id="earn-page" class="page">
-                <!-- Watch Ad Card -->
-                <div class="card">
-                    <h2 class="card-header">
-                        <span class="material-icons">monetization_on</span>
-                        Earn Rewards
-                    </h2>
-                    <div style="text-align: left; margin-bottom: 10px;">
-                        <div style="font-size: 14px; font-weight: 600;">Today's Progress:</div>
+                <!-- Daily Progress -->
+                <div class="card" style="padding: 15px;">
+                     <div style="text-align: left; margin-bottom: 10px;">
+                        <div style="font-size: 14px; font-weight: 600;">Today's Total Progress:</div>
                         <div style="font-size: 12px; color: var(--light-text-color);" id="ad-progress-text">Completed: 0 / 50</div>
                     </div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="ad-progress-bar"></div>
                     </div>
-                    <button class="primary-btn" id="watch-ad-btn">
-                        বিজ্ঞাপন দেখুন ও আয় করুন
-                        <span class="material-icons">play_circle_filled</span>
+                </div>
+
+                <!-- Task Section 1 -->
+                <div class="card">
+                    <h2 class="card-header">
+                        <span class="material-icons">task</span>
+                        Premium Task 1
+                    </h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        Visit this partner site to earn rewards instantly.
+                    </p>
+                    <button class="primary-btn" id="task-btn-1">
+                        Start Task 1
+                        <span class="material-icons">open_in_new</span>
                     </button>
                 </div>
 
-                <!-- NEW: Telegram Community Card -->
+                <!-- Task Section 2 -->
+                <div class="card">
+                    <h2 class="card-header">
+                        <span class="material-icons">verified</span>
+                        Premium Task 2
+                    </h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        Complete this special offer to boost your balance.
+                    </p>
+                    <button class="primary-btn" id="task-btn-2">
+                        Start Task 2
+                        <span class="material-icons">open_in_new</span>
+                    </button>
+                </div>
+
+                <!-- Task Section 3 -->
+                <div class="card">
+                    <h2 class="card-header">
+                        <span class="material-icons">star</span>
+                        Premium Task 3
+                    </h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        Check out this exclusive deal for bonus earnings.
+                    </p>
+                    <button class="primary-btn" id="task-btn-3">
+                        Start Task 3
+                        <span class="material-icons">open_in_new</span>
+                    </button>
+                </div>
+
+                <!-- Telegram Community Card -->
                 <div class="card">
                     <h2 class="card-header">
                         <span class="fa-brands fa-telegram" style="color: #0088cc;"></span>
@@ -507,12 +538,6 @@
         </nav>
     </div>
 
-    <!-- ===================================================================== -->
-    <!-- NEW AD SDK SCRIPT (UPDATED TO 10347382) -->
-    <!-- ===================================================================== -->
-    <script src='//libtl.com/sdk.js' data-zone='10347382' data-sdk='show_10347382'></script>
-    <!-- ===================================================================== -->
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tg = window.Telegram.WebApp;
@@ -524,7 +549,12 @@
 
             const navItems = document.querySelectorAll('.nav-item');
             const pages = document.querySelectorAll('.page');
-            const watchAdBtn = document.getElementById('watch-ad-btn');
+            
+            // Task Buttons
+            const taskBtn1 = document.getElementById('task-btn-1');
+            const taskBtn2 = document.getElementById('task-btn-2');
+            const taskBtn3 = document.getElementById('task-btn-3');
+
             const startEarningBtn = document.getElementById('start-earning-btn');
             const withdrawBtn = document.getElementById('withdraw-btn');
             const withdrawForm = document.getElementById('withdraw-form');
@@ -532,6 +562,11 @@
             const DAILY_ADS_LIMIT = 50;
             const AD_REWARD = 0.02; // BDT per ad
             const MIN_WITHDRAW_AMOUNT = 100;
+
+            // Direct Link URLs
+            const LINK_1 = "https://www.effectivegatecpm.com/u48g35c7?key=a8182d67355e7a5481130df6feb71a4d";
+            const LINK_2 = "https://www.effectivegatecpm.com/ch689ym0?key=0e197e3a615e2d975fc4082a906ddd33";
+            const LINK_3 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
 
             if (!localStorage.getItem('earnings')) {
                 localStorage.setItem('earnings', '0');
@@ -570,14 +605,17 @@
                 document.getElementById('ads-watched').textContent = adsWatched;
                 document.getElementById('total-referrals').textContent = referrals;
 
-                // Update Earn Page
+                // Update Earn Page Progress
                 document.getElementById('ad-progress-text').textContent = `Completed: ${adsWatched} / ${DAILY_ADS_LIMIT}`;
                 const progress = (adsWatched / DAILY_ADS_LIMIT) * 100;
                 document.getElementById('ad-progress-bar').style.width = `${progress}%`;
                 
-                watchAdBtn.disabled = adsWatched >= DAILY_ADS_LIMIT;
-                watchAdBtn.querySelector('span').textContent = adsWatched >= DAILY_ADS_LIMIT ? 'cancel' : 'play_circle_filled';
-                if(adsWatched >= DAILY_ADS_LIMIT) watchAdBtn.childNodes[0].nodeValue = "দৈনিক সীমা পৌঁছে গেছে ";
+                // Disable buttons if limit reached
+                const limitReached = adsWatched >= DAILY_ADS_LIMIT;
+                [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
+                    btn.disabled = limitReached;
+                    if(limitReached) btn.innerText = "Daily Limit Reached";
+                });
 
                 // Update Withdraw Page
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
@@ -610,45 +648,34 @@
             withdrawBtn.addEventListener('click', () => showPage('withdraw-page'));
             
             // ================================================================
-            // UPDATED AD LOGIC FOR SDK: show_10347382
+            // DIRECT LINK AD LOGIC
             // ================================================================
-            watchAdBtn.addEventListener('click', () => {
+            function handleAdClick(url) {
                 // Check daily limit
                 if (parseInt(localStorage.getItem('adsWatched')) >= DAILY_ADS_LIMIT) {
-                    tg.showAlert('আপনার দৈনিক বিজ্ঞাপনের সীমা পৌঁছে গেছে।');
+                    tg.showAlert('আপনার দৈনিক কাজের সীমা পৌঁছে গেছে।');
                     return;
                 }
 
-                // Disable button to prevent double clicking
-                watchAdBtn.disabled = true;
+                // Open Link
+                window.open(url, '_blank');
 
-                // Execute the new SDK function
-                if (typeof show_10347382 === 'function') {
-                    show_10347382().then(() => {
-                        // User watched the ad successfully -> Give Reward
-                        let earnings = parseFloat(localStorage.getItem('earnings')) + AD_REWARD;
-                        let currentAdsWatched = parseInt(localStorage.getItem('adsWatched')) + 1;
-                        
-                        localStorage.setItem('earnings', earnings.toString());
-                        localStorage.setItem('adsWatched', currentAdsWatched.toString());
-                        
-                        // Using showAlert for better UI integration than standard alert
-                        tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন! (You have seen an ad!)`);
-                        updateUI();
-                        
-                        // Re-enable button
-                        watchAdBtn.disabled = false;
-                    }).catch(error => {
-                        console.error('Ad error:', error);
-                        tg.showAlert('বিজ্ঞাপন লোড করা যায়নি। দয়া করে ইন্টারনেট সংযোগ চেক করুন।');
-                        watchAdBtn.disabled = false;
-                    });
-                } else {
-                    console.error('SDK Function not found');
-                    tg.showAlert('বিজ্ঞাপন লোড হতে সমস্যা হচ্ছে। কিছুক্ষণ পর চেষ্টা করুন।');
-                    watchAdBtn.disabled = false;
-                }
-            });
+                // Reward User (Simulated after click)
+                setTimeout(() => {
+                    let earnings = parseFloat(localStorage.getItem('earnings')) + AD_REWARD;
+                    let currentAdsWatched = parseInt(localStorage.getItem('adsWatched')) + 1;
+                    
+                    localStorage.setItem('earnings', earnings.toString());
+                    localStorage.setItem('adsWatched', currentAdsWatched.toString());
+                    
+                    tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন!`);
+                    updateUI();
+                }, 1500); // Small delay to simulate verification
+            }
+
+            taskBtn1.addEventListener('click', () => handleAdClick(LINK_1));
+            taskBtn2.addEventListener('click', () => handleAdClick(LINK_2));
+            taskBtn3.addEventListener('click', () => handleAdClick(LINK_3));
 
             withdrawForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -676,23 +703,16 @@
             updateUI();
         });
     </script>
-    <script type="text/javascript">
-  atOptions = {
-  	'key' : '8c1f17019d6eee50f2a467cf4e0504b0',
-  	'format' : 'iframe',
-  	'height' : 50,
-  	'width' : 320,
-  	'params' : {}
-  };
-</script>
-<script
+    <script
   type="text/javascript"
-  src="https://www.highperformanceformat.com/8c1f17019d6eee50f2a467cf4e0504b0/invoke.js"
+  src="https://pl28080969.effectivegatecpm.com/25/91/58/259158ec586075bb49adeb886c65c438.js"
 ></script>
-<script
-  type="text/javascript"
-  src="https://www.highperformanceformat.com/8c1f17019d6eee50f2a467cf4e0504b0/invoke.js"
+    <script
+  async="async"
+  data-cfasync="false"
+  src="https://pl28087364.effectivegatecpm.com/5f0b65d762714132d66c6ba8945349f3/invoke.js"
 ></script>
+<div id="container-5f0b65d762714132d66c6ba8945349f3"></div>
     <script type="text/javascript">
   atOptions = {
   	'key' : '9fd21081d4e32b54eac9a5adc4e78cde',
@@ -706,9 +726,18 @@
   type="text/javascript"
   src="https://www.highperformanceformat.com/9fd21081d4e32b54eac9a5adc4e78cde/invoke.js"
 ></script>
-    <script
+    <script type="text/javascript">
+  atOptions = {
+  	'key' : '8c1f17019d6eee50f2a467cf4e0504b0',
+  	'format' : 'iframe',
+  	'height' : 50,
+  	'width' : 320,
+  	'params' : {}
+  };
+</script>
+<script
   type="text/javascript"
-  src="https://pl28080969.effectivegatecpm.com/25/91/58/259158ec586075bb49adeb886c65c438.js"
+  src="https://www.highperformanceformat.com/8c1f17019d6eee50f2a467cf4e0504b0/invoke.js"
 ></script>
 </body>
 </html>
