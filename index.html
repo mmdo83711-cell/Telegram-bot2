@@ -504,9 +504,9 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- NEW AD SDK SCRIPT START -->
+    <!-- NEW AD SDK SCRIPT (UPDATED TO 10347382) -->
     <!-- ===================================================================== -->
-    <script src='//libtl.com/sdk.js' data-zone='10309370' data-sdk='show_10309370'></script>
+    <script src='//libtl.com/sdk.js' data-zone='10347382' data-sdk='show_10347382'></script>
     <!-- ===================================================================== -->
 
     <script>
@@ -606,7 +606,7 @@
             withdrawBtn.addEventListener('click', () => showPage('withdraw-page'));
             
             // ================================================================
-            // UPDATED AD LOGIC FOR SDK: show_10309370
+            // UPDATED AD LOGIC FOR SDK: show_10347382
             // ================================================================
             watchAdBtn.addEventListener('click', () => {
                 // Check daily limit
@@ -619,8 +619,8 @@
                 watchAdBtn.disabled = true;
 
                 // Execute the new SDK function
-                if (typeof show_10309370 === 'function') {
-                    show_10309370().then(() => {
+                if (typeof show_10347382 === 'function') {
+                    show_10347382().then(() => {
                         // User watched the ad successfully -> Give Reward
                         let earnings = parseFloat(localStorage.getItem('earnings')) + AD_REWARD;
                         let currentAdsWatched = parseInt(localStorage.getItem('adsWatched')) + 1;
@@ -628,7 +628,8 @@
                         localStorage.setItem('earnings', earnings.toString());
                         localStorage.setItem('adsWatched', currentAdsWatched.toString());
                         
-                        tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন!`);
+                        // Using showAlert for better UI integration than standard alert
+                        tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন! (You have seen an ad!)`);
                         updateUI();
                         
                         // Re-enable button
