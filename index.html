@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-    <script
-  async="async"
-  data-cfasync="false"
-  src="https://pl28087364.effectivegatecpm.com/5f0b65d762714132d66c6ba8945349f3/invoke.js"
-></script>
-<div id="container-5f0b65d762714132d66c6ba8945349f3"></div>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -325,6 +318,54 @@
             box-sizing: border-box;
             font-size: 16px;
         }
+
+        /* --- New Modal Styles --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6); /* Backdrop */
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalPop 0.3s ease-out;
+            border: 1px solid #ddd;
+        }
+        @keyframes modalPop {
+            from {transform: scale(0.8); opacity: 0;}
+            to {transform: scale(1); opacity: 1;}
+        }
+        .notice-title {
+            color: #d32f2f;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .notice-body {
+            font-size: 14px;
+            color: #333;
+            text-align: left;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .notice-body strong {
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -541,6 +582,26 @@
         </nav>
     </div>
 
+    <!-- NOTICE MODAL STRUCTURE -->
+    <div id="task-notice-modal" class="modal">
+        <div class="modal-content">
+            <div class="notice-title">📢 গুরুত্বপূর্ণ নোটিশ</div>
+            <div class="notice-body">
+                (Mini App ব্যবহারকারীদের জন্য)<br><br>
+                ▶️ <strong>Start</strong> বাটনে ক্লিক করার পর আপনার সামনে একটি ওয়েবসাইট ওপেন হবে।<br>
+                ⏳ অনুগ্রহ করে সেই ওয়েবসাইটে কমপক্ষে <strong>১০ সেকেন্ড</strong> অপেক্ষা করুন।<br><br>
+                🔁 এভাবে ৪–৫ বার টাস্ক সম্পন্ন করলে<br>
+                👉 <strong>৬ষ্ঠ বারের সময়</strong> যে ওয়েবসাইটটি ওপেন হবে,<br>
+                📝 সেখানে অবশ্যই একটি <strong>অ্যাকাউন্ট তৈরি করতে হবে।</strong><br><br>
+                ⚠️ অ্যাকাউন্ট তৈরি না করলে কোনো পেমেন্ট দেওয়া হবে না। তাই সঠিকভাবে প্রতিটি ধাপ অনুসরণ করুন।<br><br>
+                🙏 ধন্যবাদ আমাদের Mini App ব্যবহার করার জন্য।
+            </div>
+            <button id="modal-start-btn" class="primary-btn">
+                Start <span class="material-icons">play_arrow</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tg = window.Telegram.WebApp;
@@ -557,6 +618,11 @@
             const taskBtn1 = document.getElementById('task-btn-1');
             const taskBtn2 = document.getElementById('task-btn-2');
             const taskBtn3 = document.getElementById('task-btn-3');
+
+            // Modal Elements
+            const noticeModal = document.getElementById('task-notice-modal');
+            const modalStartBtn = document.getElementById('modal-start-btn');
+            let pendingTaskUrl = ''; // Stores the URL to open after clicking Start
 
             const startEarningBtn = document.getElementById('start-earning-btn');
             const withdrawBtn = document.getElementById('withdraw-btn');
@@ -651,15 +717,37 @@
             withdrawBtn.addEventListener('click', () => showPage('withdraw-page'));
             
             // ================================================================
-            // DIRECT LINK AD LOGIC
+            // MODAL & AD LOGIC
             // ================================================================
-            function handleAdClick(url) {
-                // Check daily limit
+            
+            // 1. Function to show the notice modal instead of opening link immediately
+            function initiateTask(url) {
+                // Check daily limit first
                 if (parseInt(localStorage.getItem('adsWatched')) >= DAILY_ADS_LIMIT) {
                     tg.showAlert('আপনার দৈনিক কাজের সীমা পৌঁছে গেছে।');
                     return;
                 }
+                
+                // Store the URL to open later
+                pendingTaskUrl = url;
+                
+                // Show the modal
+                noticeModal.classList.add('active');
+            }
 
+            // 2. Event Listener for the "Start" button inside the modal
+            modalStartBtn.addEventListener('click', () => {
+                // Hide the modal
+                noticeModal.classList.remove('active');
+                
+                // Proceed to open the link and give reward
+                if(pendingTaskUrl) {
+                    handleAdClick(pendingTaskUrl);
+                }
+            });
+
+            // 3. The actual function that opens the link and handles rewards
+            function handleAdClick(url) {
                 // Open Link
                 window.open(url, '_blank');
 
@@ -676,9 +764,10 @@
                 }, 1500); // Small delay to simulate verification
             }
 
-            taskBtn1.addEventListener('click', () => handleAdClick(LINK_1));
-            taskBtn2.addEventListener('click', () => handleAdClick(LINK_2));
-            taskBtn3.addEventListener('click', () => handleAdClick(LINK_3));
+            // Update button listeners to call initiateTask instead of handleAdClick directly
+            taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
+            taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
+            taskBtn3.addEventListener('click', () => initiateTask(LINK_3));
 
             withdrawForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -706,37 +795,5 @@
             updateUI();
         });
     </script>
-    <script
-  type="text/javascript"
-  src="https://pl28080969.effectivegatecpm.com/25/91/58/259158ec586075bb49adeb886c65c438.js"
-></script>
-    
-    <script type="text/javascript">
-  atOptions = {
-  	'key' : '9fd21081d4e32b54eac9a5adc4e78cde',
-  	'format' : 'iframe',
-  	'height' : 50,
-  	'width' : 320,
-  	'params' : {}
-  };
-</script>
-<script
-  type="text/javascript"
-  src="https://www.highperformanceformat.com/9fd21081d4e32b54eac9a5adc4e78cde/invoke.js"
-></script>
-    <script type="text/javascript">
-  atOptions = {
-  	'key' : '8c1f17019d6eee50f2a467cf4e0504b0',
-  	'format' : 'iframe',
-  	'height' : 50,
-  	'width' : 320,
-  	'params' : {}
-  };
-</script>
-<script
-  type="text/javascript"
-  src="https://www.highperformanceformat.com/8c1f17019d6eee50f2a467cf4e0504b0/invoke.js"
-></script>
-    
 </body>
 </html>
