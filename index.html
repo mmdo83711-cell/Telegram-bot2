@@ -319,7 +319,7 @@
             font-size: 16px;
         }
 
-        /* --- New Modal Styles --- */
+        /* --- Modal Styles (Updated) --- */
         .modal {
             display: none;
             position: fixed;
@@ -345,16 +345,35 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             animation: modalPop 0.3s ease-out;
             border: 1px solid #ddd;
+            position: relative; /* Needed for close button positioning */
         }
         @keyframes modalPop {
             from {transform: scale(0.8); opacity: 0;}
             to {transform: scale(1); opacity: 1;}
         }
+        
+        /* Close Button Style */
+        .close-modal-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+        .close-modal-btn:hover {
+            color: #d32f2f;
+        }
+
         .notice-title {
             color: #d32f2f;
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 15px;
+            margin-top: 10px; /* Added margin to clear close button */
         }
         .notice-body {
             font-size: 14px;
@@ -582,9 +601,12 @@
         </nav>
     </div>
 
-    <!-- NOTICE MODAL STRUCTURE -->
+    <!-- NOTICE MODAL STRUCTURE (UPDATED) -->
     <div id="task-notice-modal" class="modal">
         <div class="modal-content">
+            <!-- Close Button Added Here -->
+            <span id="close-modal-btn" class="close-modal-btn">&times;</span>
+            
             <div class="notice-title">📢 গুরুত্বপূর্ণ নোটিশ</div>
             <div class="notice-body">
                 (Mini App ব্যবহারকারীদের জন্য)<br><br>
@@ -622,6 +644,8 @@
             // Modal Elements
             const noticeModal = document.getElementById('task-notice-modal');
             const modalStartBtn = document.getElementById('modal-start-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn'); // New Close Button
+            
             let pendingTaskUrl = ''; // Stores the URL to open after clicking Start
 
             const startEarningBtn = document.getElementById('start-earning-btn');
@@ -720,7 +744,7 @@
             // MODAL & AD LOGIC
             // ================================================================
             
-            // 1. Function to show the notice modal instead of opening link immediately
+            // 1. Function to show the notice modal
             function initiateTask(url) {
                 // Check daily limit first
                 if (parseInt(localStorage.getItem('adsWatched')) >= DAILY_ADS_LIMIT) {
@@ -746,7 +770,21 @@
                 }
             });
 
-            // 3. The actual function that opens the link and handles rewards
+            // 3. NEW: Event Listener for the "Close/X" button
+            closeModalBtn.addEventListener('click', () => {
+                noticeModal.classList.remove('active');
+                pendingTaskUrl = ''; // Clear pending URL
+            });
+
+            // 4. Also close modal if clicked outside the content (Backdrop click)
+            window.addEventListener('click', (event) => {
+                if (event.target === noticeModal) {
+                    noticeModal.classList.remove('active');
+                    pendingTaskUrl = '';
+                }
+            });
+
+            // 5. The actual function that opens the link and handles rewards
             function handleAdClick(url) {
                 // Open Link
                 window.open(url, '_blank');
@@ -764,7 +802,7 @@
                 }, 1500); // Small delay to simulate verification
             }
 
-            // Update button listeners to call initiateTask instead of handleAdClick directly
+            // Update button listeners to call initiateTask
             taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
             taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
             taskBtn3.addEventListener('click', () => initiateTask(LINK_3));
