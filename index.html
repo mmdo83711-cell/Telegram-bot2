@@ -391,6 +391,13 @@
         .notice-body strong {
             color: #000;
         }
+        
+        /* Timer Text Style */
+        .cooldown-text {
+            font-size: 12px;
+            color: #d32f2f;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -427,7 +434,7 @@
                     <div class="dashboard-item">
                         <span class="material-icons" style="color: #ffc107;">visibility</span>
                         <div class="dashboard-item-value" id="ads-watched">0</div>
-                        <div class="dashboard-item-label">Ads Watched</div>
+                        <div class="dashboard-item-label">Total Ads Watched</div>
                     </div>
                 </div>
                 <div class="card" style="margin-top: 20px;">
@@ -440,11 +447,12 @@
             </section>
 
             <section id="earn-page" class="page">
-                <!-- Daily Progress -->
+                <!-- Hourly Progress -->
                 <div class="card" style="padding: 15px;">
                      <div style="text-align: left; margin-bottom: 10px;">
-                        <div style="font-size: 14px; font-weight: 600;">Today's Total Progress:</div>
-                        <div style="font-size: 12px; color: var(--light-text-color);" id="ad-progress-text">Completed: 0 / 50</div>
+                        <div style="font-size: 14px; font-weight: 600;">Hourly Task Progress:</div>
+                        <div style="font-size: 12px; color: var(--light-text-color);" id="ad-progress-text">Completed: 0 / 20</div>
+                        <div id="reset-timer-display" style="font-size: 12px; color: #d32f2f; display: none; font-weight: bold;"></div>
                     </div>
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="ad-progress-bar"></div>
@@ -607,10 +615,9 @@
         </nav>
     </div>
 
-    <!-- NOTICE MODAL STRUCTURE (UPDATED) -->
+    <!-- NOTICE MODAL STRUCTURE -->
     <div id="task-notice-modal" class="modal">
         <div class="modal-content">
-            <!-- Close Button Added Here -->
             <span id="close-modal-btn" class="close-modal-btn">&times;</span>
             
             <div class="notice-title">📢 গুরুত্বপূর্ণ নোটিশ</div>
@@ -650,33 +657,44 @@
             // Modal Elements
             const noticeModal = document.getElementById('task-notice-modal');
             const modalStartBtn = document.getElementById('modal-start-btn');
-            const closeModalBtn = document.getElementById('close-modal-btn'); // New Close Button
+            const closeModalBtn = document.getElementById('close-modal-btn');
             
-            let pendingTaskUrl = ''; // Stores the URL to open after clicking Start
+            let pendingTaskUrl = ''; 
+            let countdownInterval;
 
             const startEarningBtn = document.getElementById('start-earning-btn');
             const withdrawBtn = document.getElementById('withdraw-btn');
             const withdrawForm = document.getElementById('withdraw-form');
 
-            const DAILY_ADS_LIMIT = 50;
+            // ---------------- NEW CONFIGURATION ----------------
+            const HOURLY_ADS_LIMIT = 20; // 20 Ads Max
+            const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour in milliseconds
             const AD_REWARD = 0.02; // BDT per ad
             const MIN_WITHDRAW_AMOUNT = 100;
+            // ---------------------------------------------------
 
             // Direct Link URLs
             const LINK_1 = "https://www.effectivegatecpm.com/u48g35c7?key=a8182d67355e7a5481130df6feb71a4d";
             const LINK_2 = "https://www.effectivegatecpm.com/ch689ym0?key=0e197e3a615e2d975fc4082a906ddd33";
             const LINK_3 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
 
-            if (!localStorage.getItem('earnings')) {
-                localStorage.setItem('earnings', '0');
-                localStorage.setItem('adsWatched', '0');
-                localStorage.setItem('totalReferrals', '0');
-            }
+            // Initialize Storage
+            if (!localStorage.getItem('earnings')) localStorage.setItem('earnings', '0');
+            if (!localStorage.getItem('adsWatched')) localStorage.setItem('adsWatched', '0'); // Total Lifetime
+            if (!localStorage.getItem('totalReferrals')) localStorage.setItem('totalReferrals', '0');
+            
+            // Initialize Hourly Limit Storage
+            if (!localStorage.getItem('hourlyAdsWatched')) localStorage.setItem('hourlyAdsWatched', '0');
+            if (!localStorage.getItem('adSessionStart')) localStorage.setItem('adSessionStart', '0');
 
             function updateUI() {
                 const earnings = parseFloat(localStorage.getItem('earnings'));
-                const adsWatched = parseInt(localStorage.getItem('adsWatched'));
+                const totalAdsWatched = parseInt(localStorage.getItem('adsWatched'));
                 const referrals = parseInt(localStorage.getItem('totalReferrals'));
+                
+                // Hourly Logic Check
+                checkHourlyReset();
+                const hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched'));
 
                 const formattedEarnings = earnings.toFixed(2);
 
@@ -689,7 +707,6 @@
                     if (userData.photo_url) {
                         const proxyUrl = 'https://api.allorigins.win/raw?url=';
                         const proxiedPhotoUrl = `${proxyUrl}${encodeURIComponent(userData.photo_url)}`;
-                        
                         document.getElementById('header-profile-pic').src = proxiedPhotoUrl;
                         document.getElementById('profile-page-pic').src = proxiedPhotoUrl;
                     } else {
@@ -701,20 +718,49 @@
                 // Update Home Page
                 document.getElementById('current-balance').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('total-earnings').textContent = `BDT ${formattedEarnings}`;
-                document.getElementById('ads-watched').textContent = adsWatched;
+                document.getElementById('ads-watched').textContent = totalAdsWatched;
                 document.getElementById('total-referrals').textContent = referrals;
 
-                // Update Earn Page Progress
-                document.getElementById('ad-progress-text').textContent = `Completed: ${adsWatched} / ${DAILY_ADS_LIMIT}`;
-                const progress = (adsWatched / DAILY_ADS_LIMIT) * 100;
+                // Update Earn Page Progress (Based on HOURLY limit)
+                document.getElementById('ad-progress-text').textContent = `Completed: ${hourlyAds} / ${HOURLY_ADS_LIMIT}`;
+                const progress = (hourlyAds / HOURLY_ADS_LIMIT) * 100;
                 document.getElementById('ad-progress-bar').style.width = `${progress}%`;
                 
-                // Disable buttons if limit reached
-                const limitReached = adsWatched >= DAILY_ADS_LIMIT;
-                [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
-                    btn.disabled = limitReached;
-                    if(limitReached) btn.innerText = "Daily Limit Reached";
-                });
+                // Button Logic & Timer
+                const limitReached = hourlyAds >= HOURLY_ADS_LIMIT;
+                const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
+                const now = Date.now();
+                
+                if (limitReached && sessionStart > 0) {
+                    // Calculate time remaining
+                    const timePassed = now - sessionStart;
+                    const timeLeft = SESSION_DURATION - timePassed;
+                    
+                    if (timeLeft > 0) {
+                        startTimer(timeLeft);
+                        document.getElementById('reset-timer-display').style.display = 'block';
+                    } else {
+                        // Time is up, reset should happen on next check or now
+                        localStorage.setItem('hourlyAdsWatched', '0');
+                        localStorage.setItem('adSessionStart', Date.now().toString());
+                        updateUI(); // Recursive call to refresh UI
+                        return;
+                    }
+                    
+                    [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
+                        btn.disabled = true;
+                        // Button text update handled by timer
+                    });
+                } else {
+                    // Active state
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    document.getElementById('reset-timer-display').style.display = 'none';
+                    
+                    [taskBtn1, taskBtn2, taskBtn3].forEach((btn, index) => {
+                        btn.disabled = false;
+                        btn.innerHTML = `Start Task ${index + 1} <span class="material-icons">open_in_new</span>`;
+                    });
+                }
 
                 // Update Withdraw Page
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
@@ -724,8 +770,55 @@
                 // Update Profile Page
                 document.getElementById('profile-balance').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('profile-earnings').textContent = `BDT ${formattedEarnings}`;
-                document.getElementById('profile-ads-watched').textContent = adsWatched;
+                document.getElementById('profile-ads-watched').textContent = totalAdsWatched;
                 document.getElementById('profile-referrals').textContent = referrals;
+            }
+            
+            function checkHourlyReset() {
+                const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
+                // If sessionStart is 0, it means user hasn't started yet, no reset needed
+                if (sessionStart === 0) return;
+
+                const now = Date.now();
+                if (now - sessionStart >= SESSION_DURATION) {
+                    // Hour passed, reset counter
+                    localStorage.setItem('hourlyAdsWatched', '0');
+                    // We reset the start time to NOW only when they click again, 
+                    // OR we can leave it as old and update it when they click.
+                    // For safety, let's keep it old, initiateTask will update it if hourly is 0.
+                    // Actually, better to reset start time to 0 to indicate a fresh start.
+                    localStorage.setItem('adSessionStart', '0');
+                }
+            }
+
+            function startTimer(durationMs) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                
+                function updateTimer() {
+                    const now = Date.now();
+                    const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
+                    const timeLeft = SESSION_DURATION - (now - sessionStart);
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        updateUI();
+                        return;
+                    }
+
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    
+                    const timeString = `${minutes}m ${seconds}s`;
+                    
+                    document.getElementById('reset-timer-display').textContent = `Next Tasks available in: ${timeString}`;
+                    
+                    [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
+                        btn.innerHTML = `Wait ${timeString} <span class="material-icons">schedule</span>`;
+                    });
+                }
+                
+                updateTimer(); // Run immediately
+                countdownInterval = setInterval(updateTimer, 1000);
             }
 
             function showPage(targetPageId) {
@@ -737,6 +830,9 @@
                 
                 const activePage = document.getElementById(targetPageId);
                 if (activePage) activePage.classList.add('active');
+                
+                // Refresh UI when changing pages to ensure timers are correct
+                if(targetPageId === 'earn-page') updateUI();
             }
 
             navItems.forEach(item => {
@@ -750,39 +846,43 @@
             // MODAL & AD LOGIC
             // ================================================================
             
-            // 1. Function to show the notice modal
             function initiateTask(url) {
-                // Check daily limit first
-                if (parseInt(localStorage.getItem('adsWatched')) >= DAILY_ADS_LIMIT) {
-                    tg.showAlert('আপনার দৈনিক কাজের সীমা পৌঁছে গেছে।');
+                checkHourlyReset(); // Ensure clean state
+                
+                let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched'));
+                let sessionStart = parseInt(localStorage.getItem('adSessionStart'));
+
+                // Initialize session if first ad of the hour
+                if (hourlyAds === 0 || sessionStart === 0) {
+                    // If sessionStart is old (checkHourlyReset handled logic, but let's be safe)
+                    // We set the session start time NOW.
+                    if (sessionStart === 0) {
+                        localStorage.setItem('adSessionStart', Date.now().toString());
+                    }
+                }
+
+                // Check limit
+                if (hourlyAds >= HOURLY_ADS_LIMIT) {
+                    updateUI(); // This will trigger the timer view
                     return;
                 }
                 
-                // Store the URL to open later
                 pendingTaskUrl = url;
-                
-                // Show the modal
                 noticeModal.classList.add('active');
             }
 
-            // 2. Event Listener for the "Start" button inside the modal
             modalStartBtn.addEventListener('click', () => {
-                // Hide the modal
                 noticeModal.classList.remove('active');
-                
-                // Proceed to open the link and give reward
                 if(pendingTaskUrl) {
                     handleAdClick(pendingTaskUrl);
                 }
             });
 
-            // 3. NEW: Event Listener for the "Close/X" button
             closeModalBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('active');
-                pendingTaskUrl = ''; // Clear pending URL
+                pendingTaskUrl = ''; 
             });
 
-            // 4. Also close modal if clicked outside the content (Backdrop click)
             window.addEventListener('click', (event) => {
                 if (event.target === noticeModal) {
                     noticeModal.classList.remove('active');
@@ -790,25 +890,32 @@
                 }
             });
 
-            // 5. The actual function that opens the link and handles rewards
             function handleAdClick(url) {
-                // Open Link
                 window.open(url, '_blank');
 
-                // Reward User (Simulated after click)
                 setTimeout(() => {
+                    // Update Lifetime Earnings
                     let earnings = parseFloat(localStorage.getItem('earnings')) + AD_REWARD;
-                    let currentAdsWatched = parseInt(localStorage.getItem('adsWatched')) + 1;
+                    let totalAds = parseInt(localStorage.getItem('adsWatched')) + 1;
                     
+                    // Update Hourly Progress
+                    let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched')) + 1;
+                    
+                    // Set Session Start if this was the first ad and somehow missed
+                    if (parseInt(localStorage.getItem('adSessionStart')) === 0) {
+                         localStorage.setItem('adSessionStart', Date.now().toString());
+                    }
+
                     localStorage.setItem('earnings', earnings.toString());
-                    localStorage.setItem('adsWatched', currentAdsWatched.toString());
+                    localStorage.setItem('adsWatched', totalAds.toString());
+                    localStorage.setItem('hourlyAdsWatched', hourlyAds.toString());
                     
                     tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন!`);
                     updateUI();
-                }, 1500); // Small delay to simulate verification
+                }, 1500); 
             }
 
-            // Update button listeners to call initiateTask
+            // Update button listeners
             taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
             taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
             taskBtn3.addEventListener('click', () => initiateTask(LINK_3));
@@ -835,6 +942,17 @@
                     }
                 });
             });
+
+            // Timer check every second even if not on page to keep consistency
+            setInterval(() => {
+                if(document.getElementById('earn-page').classList.contains('active')) {
+                     checkHourlyReset();
+                     // Only full update if limit was reached to refresh timer
+                     if(parseInt(localStorage.getItem('hourlyAdsWatched')) >= HOURLY_ADS_LIMIT) {
+                         updateUI(); 
+                     }
+                }
+            }, 5000);
 
             updateUI();
         });
