@@ -535,7 +535,7 @@
                     </button>
                 </div>
 
-                <!-- Task Section 4 (NEW) -->
+                <!-- Task Section 4 (Existing) -->
                 <div class="card" style="border: 2px solid var(--secondary-color);">
                     <h2 class="card-header">
                         <span class="material-icons" style="color: var(--secondary-color);">camera_alt</span>
@@ -546,6 +546,21 @@
                     </p>
                     <button class="primary-btn" id="task-btn-4" style="background-color: var(--secondary-color);">
                         Start Task 4
+                        <span class="material-icons">open_in_new</span>
+                    </button>
+                </div>
+
+                <!-- Task Section 5 (NEW - TikTok) -->
+                <div class="card" style="border: 2px solid #000;">
+                    <h2 class="card-header">
+                        <span class="fa-brands fa-tiktok" style="color: #000;"></span>
+                        TikTok Follow
+                    </h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        TikTok আইডি ফলো করুন এবং আয় করুন। (শুধুমাত্র একবার প্রযোজ্য)
+                    </p>
+                    <button class="primary-btn" id="task-btn-tiktok" style="background-color: #000;">
+                        Follow TikTok
                         <span class="material-icons">open_in_new</span>
                     </button>
                 </div>
@@ -747,7 +762,8 @@
             const taskBtn1 = document.getElementById('task-btn-1');
             const taskBtn2 = document.getElementById('task-btn-2');
             const taskBtn3 = document.getElementById('task-btn-3');
-            const taskBtn4 = document.getElementById('task-btn-4'); // New Task Button
+            const taskBtn4 = document.getElementById('task-btn-4'); 
+            const taskBtnTikTok = document.getElementById('task-btn-tiktok'); // TikTok Button
 
             // Standard Modal Elements
             const noticeModal = document.getElementById('task-notice-modal');
@@ -761,7 +777,7 @@
             const submitProofBtn = document.getElementById('submit-proof-btn');
             
             let pendingTaskUrl = ''; 
-            let pendingRewardAmount = 0; // To store different rewards
+            let pendingRewardAmount = 0; 
             let countdownInterval;
 
             const startEarningBtn = document.getElementById('start-earning-btn');
@@ -774,14 +790,15 @@
             const SESSION_DURATION = 60 * 60 * 1000; 
             const AD_REWARD = 0.02; 
             const BANNER_TASK_REWARD = 0.50; 
+            const TIKTOK_TASK_REWARD = 0.50; // TikTok Reward Amount
             
             // Withdraw Limits
             const MIN_BKASH_WITHDRAW = 100;
             const MIN_WEBMONEY_WITHDRAW = 500;
 
             // ***** TELEGRAM BOT CONFIGURATION *****
-            const BOT_TOKEN = '8517755201:AAFAnwqBFjtc9NZcTdXHzUtNDEJtZ0c6OKs'; // Updated Token
-            const CHAT_ID = '@earnfree0t'; // Channel Username
+            const BOT_TOKEN = '8517755201:AAFAnwqBFjtc9NZcTdXHzUtNDEJtZ0c6OKs'; 
+            const CHAT_ID = '@earnfree0t'; 
             // **************************************
 
             // Direct Link URLs
@@ -789,11 +806,13 @@
             const LINK_2 = "https://www.effectivegatecpm.com/ch689ym0?key=0e197e3a615e2d975fc4082a906ddd33";
             const LINK_3 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
             const LINK_4 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
+            const TIKTOK_LINK = "https://www.tiktok.com/@bhola_king0";
 
             // Initialize Storage
             if (!localStorage.getItem('earnings')) localStorage.setItem('earnings', '0');
             if (!localStorage.getItem('adsWatched')) localStorage.setItem('adsWatched', '0'); 
             if (!localStorage.getItem('totalReferrals')) localStorage.setItem('totalReferrals', '0');
+            if (!localStorage.getItem('tiktokTaskCompleted')) localStorage.setItem('tiktokTaskCompleted', 'false'); // TikTok Check
             
             // Initialize Hourly Limit Storage
             if (!localStorage.getItem('hourlyAdsWatched')) localStorage.setItem('hourlyAdsWatched', '0');
@@ -867,6 +886,13 @@
                     
                     taskBtn4.disabled = false;
                     taskBtn4.innerHTML = `Start Task 4 <span class="material-icons">open_in_new</span>`;
+                }
+
+                // TikTok Button State (Optional - Visual cue, but functionality is handled in click)
+                const isTikTokDone = localStorage.getItem('tiktokTaskCompleted') === 'true';
+                if(isTikTokDone) {
+                     // We keep it clickable as per request, but maybe change text slightly or keep same
+                     // taskBtnTikTok.innerHTML = `Visit TikTok <span class="material-icons">check_circle</span>`;
                 }
 
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
@@ -1118,6 +1144,31 @@
                 tg.showAlert(`অভিনন্দন! আপনি BDT ${rewardAmount.toFixed(2)} আয় করেছেন!`);
                 updateUI();
             }
+
+            // TIKTOK LOGIC
+            taskBtnTikTok.addEventListener('click', () => {
+                // 1. Always open the link
+                window.open(TIKTOK_LINK, '_blank');
+
+                // 2. Check if already claimed
+                const isClaimed = localStorage.getItem('tiktokTaskCompleted') === 'true';
+
+                if (isClaimed) {
+                    // 3. Show alert if already claimed
+                    tg.showAlert("আপনি ইতিমধ্যে এই টাস্কের জন্য পেমেন্ট পেয়েছেন। দ্বিতীয়বার পেমেন্ট দেওয়া হবে না।");
+                } else {
+                    // 4. Reward logic for the first time
+                    // Using a timeout to simulate user following the account
+                    setTimeout(() => {
+                        let earnings = parseFloat(localStorage.getItem('earnings')) + TIKTOK_TASK_REWARD;
+                        localStorage.setItem('earnings', earnings.toString());
+                        localStorage.setItem('tiktokTaskCompleted', 'true');
+                        
+                        tg.showAlert(`TikTok Follow টাস্ক কমপ্লিট! আপনি BDT ${TIKTOK_TASK_REWARD.toFixed(2)} বোনাস পেয়েছেন।`);
+                        updateUI();
+                    }, 5000); // 5 seconds delay before crediting
+                }
+            });
 
             taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
             taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
