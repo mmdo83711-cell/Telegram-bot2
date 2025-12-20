@@ -551,8 +551,11 @@
                     </h2>
                     <div class="balance" id="withdraw-balance-display">BDT 0.00</div>
                     <div class="card-label">Current Balance</div>
+                    <!-- Updated Limits Text -->
                     <div style="margin-top: 20px; font-size: 14px; color: var(--light-text-color);">
-                        Minimum withdraw amount is BDT 100.00
+                        <b>Minimum Withdraw Limits:</b><br>
+                        bKash: BDT 100.00<br>
+                        WebMoney: BDT 500.00
                     </div>
                 </div>
                 
@@ -561,19 +564,20 @@
                     <form id="withdraw-form">
                         <div class="form-group">
                             <label for="withdraw-method">Withdraw Method</label>
+                            <!-- Updated Options -->
                             <select id="withdraw-method" required>
                                 <option value="" disabled selected>Select a method</option>
-                                <option value="bkash">bKash</option>
-                                <option value="binance">Binance</option>
+                                <option value="bkash">bKash (Min 100)</option>
+                                <option value="webmoney">WebMoney (Min 500)</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="account-number">Account Number</label>
-                            <input type="text" id="account-number" placeholder="Enter bKash/Binance account number" required>
+                            <input type="text" id="account-number" placeholder="Enter Account Number" required>
                         </div>
                         <div class="form-group">
                             <label for="withdraw-amount">Amount (BDT)</label>
-                            <input type="number" id="withdraw-amount" placeholder="Enter amount to withdraw" required min="100">
+                            <input type="number" id="withdraw-amount" placeholder="Enter amount to withdraw" required>
                         </div>
                         <button type="submit" class="primary-btn" id="submit-withdraw-btn">
                             Submit Withdraw Request
@@ -712,13 +716,17 @@
             const startEarningBtn = document.getElementById('start-earning-btn');
             const withdrawBtn = document.getElementById('withdraw-btn');
             const withdrawForm = document.getElementById('withdraw-form');
+            const withdrawMethodSelect = document.getElementById('withdraw-method');
 
             // ---------------- CONFIGURATION ----------------
             const HOURLY_ADS_LIMIT = 20; // 20 Ads Max
             const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour
             const AD_REWARD = 0.02; // Standard Reward
             const BANNER_TASK_REWARD = 0.50; // Special Reward for Task 4
-            const MIN_WITHDRAW_AMOUNT = 100;
+            
+            // Updated Withdraw Limits
+            const MIN_BKASH_WITHDRAW = 100;
+            const MIN_WEBMONEY_WITHDRAW = 500;
             // ---------------------------------------------------
 
             // Direct Link URLs
@@ -814,9 +822,9 @@
                     taskBtn4.innerHTML = `Start Task 4 <span class="material-icons">open_in_new</span>`;
                 }
 
+                // Update Withdraw Display
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
-                document.getElementById('submit-withdraw-btn').disabled = earnings < MIN_WITHDRAW_AMOUNT;
-                if(earnings < MIN_WITHDRAW_AMOUNT) document.getElementById('submit-withdraw-btn').textContent = `ন্যূনতম BDT ${MIN_WITHDRAW_AMOUNT} প্রয়োজন`;
+                updateWithdrawButtonState(); // Helper function to check specific limit
 
                 document.getElementById('profile-balance').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('profile-earnings').textContent = `BDT ${formattedEarnings}`;
@@ -824,6 +832,30 @@
                 document.getElementById('profile-referrals').textContent = referrals;
             }
             
+            // New Helper to handle Dynamic Withdraw Limits
+            function updateWithdrawButtonState() {
+                const earnings = parseFloat(localStorage.getItem('earnings'));
+                const method = withdrawMethodSelect.value;
+                let currentLimit = MIN_BKASH_WITHDRAW; // Default
+
+                if (method === 'webmoney') {
+                    currentLimit = MIN_WEBMONEY_WITHDRAW;
+                }
+                
+                const btn = document.getElementById('submit-withdraw-btn');
+                
+                if (earnings < currentLimit) {
+                    btn.disabled = true;
+                    btn.textContent = `ন্যূনতম BDT ${currentLimit} প্রয়োজন`;
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = `Submit Withdraw Request`;
+                }
+            }
+            
+            // Event Listener for Dropdown Change
+            withdrawMethodSelect.addEventListener('change', updateWithdrawButtonState);
+
             function checkHourlyReset() {
                 const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
                 if (sessionStart === 0) return;
@@ -875,6 +907,7 @@
                 if (activePage) activePage.classList.add('active');
                 
                 if(targetPageId === 'earn-page') updateUI();
+                if(targetPageId === 'withdraw-page') updateUI(); // Ensure withdraw button is correct
             }
 
             navItems.forEach(item => {
@@ -888,7 +921,6 @@
             // MODAL & AD LOGIC
             // ================================================================
             
-            // Common check for limits
             function checkLimit() {
                 checkHourlyReset(); 
                 let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched'));
@@ -906,25 +938,20 @@
                 return true;
             }
 
-            // Standard Tasks (1, 2, 3)
             function initiateTask(url) {
                 if(!checkLimit()) return;
-                
                 pendingTaskUrl = url;
                 pendingRewardAmount = AD_REWARD;
                 noticeModal.classList.add('active');
             }
             
-            // Special Banner Task (4)
             function initiateBannerTask(url) {
                 if(!checkLimit()) return;
-                
                 pendingTaskUrl = url;
                 pendingRewardAmount = BANNER_TASK_REWARD;
                 bannerModal.classList.add('active');
             }
 
-            // Standard Modal Events
             modalStartBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('active');
                 if(pendingTaskUrl) handleAdClick(pendingTaskUrl, pendingRewardAmount);
@@ -934,7 +961,6 @@
                 pendingTaskUrl = ''; 
             });
 
-            // Banner Modal Events
             bannerModalStartBtn.addEventListener('click', () => {
                 bannerModal.classList.remove('active');
                 if(pendingTaskUrl) handleAdClick(pendingTaskUrl, pendingRewardAmount);
@@ -944,7 +970,6 @@
                 pendingTaskUrl = ''; 
             });
 
-            // Universal Window Click
             window.addEventListener('click', (event) => {
                 if (event.target === noticeModal) {
                     noticeModal.classList.remove('active');
@@ -960,11 +985,8 @@
                 window.open(url, '_blank');
 
                 setTimeout(() => {
-                    // Update Lifetime Earnings
                     let earnings = parseFloat(localStorage.getItem('earnings')) + rewardAmount;
                     let totalAds = parseInt(localStorage.getItem('adsWatched')) + 1;
-                    
-                    // Update Hourly Progress
                     let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched')) + 1;
                     
                     if (parseInt(localStorage.getItem('adSessionStart')) === 0) {
@@ -977,10 +999,9 @@
                     
                     tg.showAlert(`অভিনন্দন! আপনি BDT ${rewardAmount.toFixed(2)} আয় করেছেন!`);
                     updateUI();
-                }, 3000); // 3 Seconds wait to simulate "Back" verification
+                }, 3000); 
             }
 
-            // Task Button Listeners
             taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
             taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
             taskBtn3.addEventListener('click', () => initiateTask(LINK_3));
@@ -989,16 +1010,32 @@
             withdrawForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const amount = parseFloat(document.getElementById('withdraw-amount').value);
+                const method = document.getElementById('withdraw-method').value;
+                const earnings = parseFloat(localStorage.getItem('earnings'));
                 
-                tg.showConfirm(`আপনি কি আপনার উইথড্র অনুরোধ জমা দিতে চান?`, (confirmed) => {
+                // Extra Validation Check
+                let requiredAmount = MIN_BKASH_WITHDRAW;
+                if(method === 'webmoney') requiredAmount = MIN_WEBMONEY_WITHDRAW;
+                
+                if (amount < requiredAmount) {
+                    tg.showAlert(`এই মেথডের জন্য ন্যূনতম ${requiredAmount} টাকা প্রয়োজন।`);
+                    return;
+                }
+
+                if (amount > earnings) {
+                    tg.showAlert(`অপর্যাপ্ত ব্যালেন্স।`);
+                    return;
+                }
+                
+                tg.showConfirm(`আপনি কি ${method} এর মাধ্যমে ${amount} টাকা উইথড্র করতে চান?`, (confirmed) => {
                     if (confirmed) {
-                        let newEarnings = parseFloat(localStorage.getItem('earnings')) - amount;
+                        let newEarnings = earnings - amount;
                         localStorage.setItem('earnings', newEarnings.toString());
                         
                         tg.sendData(JSON.stringify({ 
                             type: 'withdrawal', 
                             amount: amount, 
-                            method: document.getElementById('withdraw-method').value,
+                            method: method,
                             account: document.getElementById('account-number').value
                         }));
                         
