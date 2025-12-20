@@ -352,6 +352,8 @@
             animation: modalPop 0.3s ease-out;
             border: 1px solid #ddd;
             position: relative; /* Needed for close button positioning */
+            max-height: 90vh; /* Scrollable if long */
+            overflow-y: auto;
         }
         @keyframes modalPop {
             from {transform: scale(0.8); opacity: 0;}
@@ -504,6 +506,21 @@
                     </button>
                 </div>
 
+                <!-- Task Section 4 (NEW) -->
+                <div class="card" style="border: 2px solid var(--secondary-color);">
+                    <h2 class="card-header">
+                        <span class="material-icons" style="color: var(--secondary-color);">camera_alt</span>
+                        Banner Task 4
+                    </h2>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        Complete this premium banner task to earn BDT 0.50!
+                    </p>
+                    <button class="primary-btn" id="task-btn-4" style="background-color: var(--secondary-color);">
+                        Start Task 4
+                        <span class="material-icons">open_in_new</span>
+                    </button>
+                </div>
+
                 <!-- Telegram Community Card -->
                 <div class="card">
                     <h2 class="card-header">
@@ -615,11 +632,10 @@
         </nav>
     </div>
 
-    <!-- NOTICE MODAL STRUCTURE -->
+    <!-- NOTICE MODAL STRUCTURE (STANDARD FOR TASK 1, 2, 3) -->
     <div id="task-notice-modal" class="modal">
         <div class="modal-content">
             <span id="close-modal-btn" class="close-modal-btn">&times;</span>
-            
             <div class="notice-title">📢 গুরুত্বপূর্ণ নোটিশ</div>
             <div class="notice-body">
                 (Mini App ব্যবহারকারীদের জন্য)<br><br>
@@ -628,10 +644,34 @@
                 🔁 এভাবে ৪–৫ বার টাস্ক সম্পন্ন করলে<br>
                 👉 <strong>৬ষ্ঠ বারের সময়</strong> যে ওয়েবসাইটটি ওপেন হবে,<br>
                 📝 সেখানে অবশ্যই একটি <strong>অ্যাকাউন্ট তৈরি করতে হবে।</strong><br><br>
-                ⚠️ অ্যাকাউন্ট তৈরি না করলে কোনো পেমেন্ট দেওয়া হবে না। তাই সঠিকভাবে প্রতিটি ধাপ অনুসরণ করুন।<br><br>
-                🙏 ধন্যবাদ আমাদের Mini App ব্যবহার করার জন্য।
+                ⚠️ অ্যাকাউন্ট তৈরি না করলে কোনো পেমেন্ট দেওয়া হবে না।
             </div>
             <button id="modal-start-btn" class="primary-btn">
+                Start <span class="material-icons">play_arrow</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- NOTICE MODAL STRUCTURE (NEW FOR TASK 4) -->
+    <div id="banner-notice-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-banner-modal-btn" class="close-modal-btn">&times;</span>
+            <div class="notice-title">📢 কাজ করার নিয়ম (Banner Version)</div>
+            <div class="notice-body" style="text-align: left;">
+                👉 <strong>Start</strong> বাটনে ক্লিক করুন<br>
+                🌐 একটি ওয়েবসাইট ওপেন হবে<br>
+                📸 <strong>স্ক্রিনশট নিন (মোট ২টি):</strong><br>
+                1️⃣ ওয়েবসাইটের হোম স্ক্রিন<br>
+                2️⃣ একাউন্ট খোলার সময় বা লগইন করার সময়<br>
+                👤 একাউন্ট না থাকলে ➝ নতুন একাউন্ট খুলুন<br>
+                👤 একাউন্ট থাকলে ➝ লগইন করুন<br>
+                📤 নেওয়া ২টি স্ক্রিনশট আমাদের টেলিগ্রাম গ্রুপে আপলোড করুন<br><br>
+                ⚠️ <strong>নিয়ম:</strong><br>
+                স্ক্রিনশট ছাড়া পেমেন্ট দেওয়া হবে না।<br>
+                একই স্ক্রিনশট বারবার আপলোড করবেন না।<br>
+                <strong>টাস্ক রিওয়ার্ড: BDT 0.50</strong>
+            </div>
+            <button id="banner-modal-start-btn" class="primary-btn">
                 Start <span class="material-icons">play_arrow</span>
             </button>
         </div>
@@ -653,23 +693,31 @@
             const taskBtn1 = document.getElementById('task-btn-1');
             const taskBtn2 = document.getElementById('task-btn-2');
             const taskBtn3 = document.getElementById('task-btn-3');
+            const taskBtn4 = document.getElementById('task-btn-4'); // New Task Button
 
-            // Modal Elements
+            // Standard Modal Elements
             const noticeModal = document.getElementById('task-notice-modal');
             const modalStartBtn = document.getElementById('modal-start-btn');
             const closeModalBtn = document.getElementById('close-modal-btn');
             
+            // Banner Modal Elements (New)
+            const bannerModal = document.getElementById('banner-notice-modal');
+            const bannerModalStartBtn = document.getElementById('banner-modal-start-btn');
+            const closeBannerModalBtn = document.getElementById('close-banner-modal-btn');
+            
             let pendingTaskUrl = ''; 
+            let pendingRewardAmount = 0; // To store different rewards
             let countdownInterval;
 
             const startEarningBtn = document.getElementById('start-earning-btn');
             const withdrawBtn = document.getElementById('withdraw-btn');
             const withdrawForm = document.getElementById('withdraw-form');
 
-            // ---------------- NEW CONFIGURATION ----------------
+            // ---------------- CONFIGURATION ----------------
             const HOURLY_ADS_LIMIT = 20; // 20 Ads Max
-            const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour in milliseconds
-            const AD_REWARD = 0.02; // BDT per ad
+            const SESSION_DURATION = 60 * 60 * 1000; // 1 Hour
+            const AD_REWARD = 0.02; // Standard Reward
+            const BANNER_TASK_REWARD = 0.50; // Special Reward for Task 4
             const MIN_WITHDRAW_AMOUNT = 100;
             // ---------------------------------------------------
 
@@ -677,10 +725,14 @@
             const LINK_1 = "https://www.effectivegatecpm.com/u48g35c7?key=a8182d67355e7a5481130df6feb71a4d";
             const LINK_2 = "https://www.effectivegatecpm.com/ch689ym0?key=0e197e3a615e2d975fc4082a906ddd33";
             const LINK_3 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
+            
+            // *************** ADD YOUR LINK HERE FOR TASK 4 ***************
+            const LINK_4 = "https://www.effectivegatecpm.com/up95hbv6v7?key=120544a3f30d0fce7151a07cac8a30f4";
+            // *************************************************************
 
             // Initialize Storage
             if (!localStorage.getItem('earnings')) localStorage.setItem('earnings', '0');
-            if (!localStorage.getItem('adsWatched')) localStorage.setItem('adsWatched', '0'); // Total Lifetime
+            if (!localStorage.getItem('adsWatched')) localStorage.setItem('adsWatched', '0'); 
             if (!localStorage.getItem('totalReferrals')) localStorage.setItem('totalReferrals', '0');
             
             // Initialize Hourly Limit Storage
@@ -721,7 +773,7 @@
                 document.getElementById('ads-watched').textContent = totalAdsWatched;
                 document.getElementById('total-referrals').textContent = referrals;
 
-                // Update Earn Page Progress (Based on HOURLY limit)
+                // Update Earn Page Progress
                 document.getElementById('ad-progress-text').textContent = `Completed: ${hourlyAds} / ${HOURLY_ADS_LIMIT}`;
                 const progress = (hourlyAds / HOURLY_ADS_LIMIT) * 100;
                 document.getElementById('ad-progress-bar').style.width = `${progress}%`;
@@ -732,7 +784,6 @@
                 const now = Date.now();
                 
                 if (limitReached && sessionStart > 0) {
-                    // Calculate time remaining
                     const timePassed = now - sessionStart;
                     const timeLeft = SESSION_DURATION - timePassed;
                     
@@ -740,19 +791,17 @@
                         startTimer(timeLeft);
                         document.getElementById('reset-timer-display').style.display = 'block';
                     } else {
-                        // Time is up, reset should happen on next check or now
                         localStorage.setItem('hourlyAdsWatched', '0');
                         localStorage.setItem('adSessionStart', Date.now().toString());
-                        updateUI(); // Recursive call to refresh UI
+                        updateUI(); 
                         return;
                     }
                     
-                    [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
+                    // Disable all buttons including Task 4
+                    [taskBtn1, taskBtn2, taskBtn3, taskBtn4].forEach(btn => {
                         btn.disabled = true;
-                        // Button text update handled by timer
                     });
                 } else {
-                    // Active state
                     if (countdownInterval) clearInterval(countdownInterval);
                     document.getElementById('reset-timer-display').style.display = 'none';
                     
@@ -760,14 +809,15 @@
                         btn.disabled = false;
                         btn.innerHTML = `Start Task ${index + 1} <span class="material-icons">open_in_new</span>`;
                     });
+                    
+                    taskBtn4.disabled = false;
+                    taskBtn4.innerHTML = `Start Task 4 <span class="material-icons">open_in_new</span>`;
                 }
 
-                // Update Withdraw Page
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('submit-withdraw-btn').disabled = earnings < MIN_WITHDRAW_AMOUNT;
                 if(earnings < MIN_WITHDRAW_AMOUNT) document.getElementById('submit-withdraw-btn').textContent = `ন্যূনতম BDT ${MIN_WITHDRAW_AMOUNT} প্রয়োজন`;
 
-                // Update Profile Page
                 document.getElementById('profile-balance').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('profile-earnings').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('profile-ads-watched').textContent = totalAdsWatched;
@@ -776,17 +826,11 @@
             
             function checkHourlyReset() {
                 const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
-                // If sessionStart is 0, it means user hasn't started yet, no reset needed
                 if (sessionStart === 0) return;
 
                 const now = Date.now();
                 if (now - sessionStart >= SESSION_DURATION) {
-                    // Hour passed, reset counter
                     localStorage.setItem('hourlyAdsWatched', '0');
-                    // We reset the start time to NOW only when they click again, 
-                    // OR we can leave it as old and update it when they click.
-                    // For safety, let's keep it old, initiateTask will update it if hourly is 0.
-                    // Actually, better to reset start time to 0 to indicate a fresh start.
                     localStorage.setItem('adSessionStart', '0');
                 }
             }
@@ -807,31 +851,29 @@
 
                     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                    
                     const timeString = `${minutes}m ${seconds}s`;
                     
                     document.getElementById('reset-timer-display').textContent = `Next Tasks available in: ${timeString}`;
                     
-                    [taskBtn1, taskBtn2, taskBtn3].forEach(btn => {
+                    [taskBtn1, taskBtn2, taskBtn3, taskBtn4].forEach(btn => {
                         btn.innerHTML = `Wait ${timeString} <span class="material-icons">schedule</span>`;
                     });
                 }
                 
-                updateTimer(); // Run immediately
+                updateTimer(); 
                 countdownInterval = setInterval(updateTimer, 1000);
             }
 
             function showPage(targetPageId) {
                 navItems.forEach(nav => nav.classList.remove('active'));
                 pages.forEach(page => page.classList.remove('active'));
-
+                
                 const activeNavItem = document.querySelector(`[data-page="${targetPageId}"]`);
                 if (activeNavItem) activeNavItem.classList.add('active');
                 
                 const activePage = document.getElementById(targetPageId);
                 if (activePage) activePage.classList.add('active');
                 
-                // Refresh UI when changing pages to ensure timers are correct
                 if(targetPageId === 'earn-page') updateUI();
             }
 
@@ -846,62 +888,85 @@
             // MODAL & AD LOGIC
             // ================================================================
             
-            function initiateTask(url) {
-                checkHourlyReset(); // Ensure clean state
-                
+            // Common check for limits
+            function checkLimit() {
+                checkHourlyReset(); 
                 let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched'));
                 let sessionStart = parseInt(localStorage.getItem('adSessionStart'));
 
-                // Initialize session if first ad of the hour
                 if (hourlyAds === 0 || sessionStart === 0) {
-                    // If sessionStart is old (checkHourlyReset handled logic, but let's be safe)
-                    // We set the session start time NOW.
                     if (sessionStart === 0) {
                         localStorage.setItem('adSessionStart', Date.now().toString());
                     }
                 }
-
-                // Check limit
                 if (hourlyAds >= HOURLY_ADS_LIMIT) {
-                    updateUI(); // This will trigger the timer view
-                    return;
+                    updateUI();
+                    return false;
                 }
-                
-                pendingTaskUrl = url;
-                noticeModal.classList.add('active');
+                return true;
             }
 
+            // Standard Tasks (1, 2, 3)
+            function initiateTask(url) {
+                if(!checkLimit()) return;
+                
+                pendingTaskUrl = url;
+                pendingRewardAmount = AD_REWARD;
+                noticeModal.classList.add('active');
+            }
+            
+            // Special Banner Task (4)
+            function initiateBannerTask(url) {
+                if(!checkLimit()) return;
+                
+                pendingTaskUrl = url;
+                pendingRewardAmount = BANNER_TASK_REWARD;
+                bannerModal.classList.add('active');
+            }
+
+            // Standard Modal Events
             modalStartBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('active');
-                if(pendingTaskUrl) {
-                    handleAdClick(pendingTaskUrl);
-                }
+                if(pendingTaskUrl) handleAdClick(pendingTaskUrl, pendingRewardAmount);
             });
-
             closeModalBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('active');
                 pendingTaskUrl = ''; 
             });
 
+            // Banner Modal Events
+            bannerModalStartBtn.addEventListener('click', () => {
+                bannerModal.classList.remove('active');
+                if(pendingTaskUrl) handleAdClick(pendingTaskUrl, pendingRewardAmount);
+            });
+            closeBannerModalBtn.addEventListener('click', () => {
+                bannerModal.classList.remove('active');
+                pendingTaskUrl = ''; 
+            });
+
+            // Universal Window Click
             window.addEventListener('click', (event) => {
                 if (event.target === noticeModal) {
                     noticeModal.classList.remove('active');
                     pendingTaskUrl = '';
                 }
+                if (event.target === bannerModal) {
+                    bannerModal.classList.remove('active');
+                    pendingTaskUrl = '';
+                }
             });
 
-            function handleAdClick(url) {
+            function handleAdClick(url, rewardAmount) {
                 window.open(url, '_blank');
 
                 setTimeout(() => {
                     // Update Lifetime Earnings
-                    let earnings = parseFloat(localStorage.getItem('earnings')) + AD_REWARD;
+                    let earnings = parseFloat(localStorage.getItem('earnings')) + rewardAmount;
                     let totalAds = parseInt(localStorage.getItem('adsWatched')) + 1;
                     
                     // Update Hourly Progress
                     let hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched')) + 1;
                     
-                    // Set Session Start if this was the first ad and somehow missed
                     if (parseInt(localStorage.getItem('adSessionStart')) === 0) {
                          localStorage.setItem('adSessionStart', Date.now().toString());
                     }
@@ -910,15 +975,16 @@
                     localStorage.setItem('adsWatched', totalAds.toString());
                     localStorage.setItem('hourlyAdsWatched', hourlyAds.toString());
                     
-                    tg.showAlert(`অভিনন্দন! আপনি BDT ${AD_REWARD.toFixed(2)} আয় করেছেন!`);
+                    tg.showAlert(`অভিনন্দন! আপনি BDT ${rewardAmount.toFixed(2)} আয় করেছেন!`);
                     updateUI();
-                }, 1500); 
+                }, 3000); // 3 Seconds wait to simulate "Back" verification
             }
 
-            // Update button listeners
+            // Task Button Listeners
             taskBtn1.addEventListener('click', () => initiateTask(LINK_1));
             taskBtn2.addEventListener('click', () => initiateTask(LINK_2));
             taskBtn3.addEventListener('click', () => initiateTask(LINK_3));
+            taskBtn4.addEventListener('click', () => initiateBannerTask(LINK_4));
 
             withdrawForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -943,11 +1009,9 @@
                 });
             });
 
-            // Timer check every second even if not on page to keep consistency
             setInterval(() => {
                 if(document.getElementById('earn-page').classList.contains('active')) {
                      checkHourlyReset();
-                     // Only full update if limit was reached to refresh timer
                      if(parseInt(localStorage.getItem('hourlyAdsWatched')) >= HOURLY_ADS_LIMIT) {
                          updateUI(); 
                      }
