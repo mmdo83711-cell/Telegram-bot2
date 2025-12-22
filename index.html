@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <!-- External Scripts remain unchanged -->
     <script
   async="async"
   data-cfasync="false"
@@ -65,18 +66,35 @@
             object-fit: cover;
         }
 
+        .header-user-info {
+            flex-grow: 1;
+        }
+
         .header-user-info h3 {
             margin: 0;
             font-size: 16px;
             font-weight: 600;
         }
-        
-        .header-user-info p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--light-text-color);
-        }
 
+        /* --- NEW USER ID STYLES --- */
+        .user-id-wrapper {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: var(--light-text-color);
+            margin-top: 2px;
+        }
+        .copy-icon {
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: pointer;
+            color: var(--primary-color);
+            padding: 2px;
+        }
+        .copy-icon:active {
+            transform: scale(0.9);
+        }
+        
         .content {
             flex-grow: 1;
             padding: 20px;
@@ -166,7 +184,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            text-decoration: none; /* For link buttons */
+            text-decoration: none;
             box-sizing: border-box;
         }
         
@@ -269,7 +287,7 @@
         }
         
         /* Profile & Withdraw Page Styles */
-        .profile-info, .withdraw-form-container {
+        .profile-info, .withdraw-form-container, .support-form-container {
             background-color: var(--card-background);
             border-radius: 12px;
             padding: 20px;
@@ -316,16 +334,21 @@
             font-size: 14px;
             font-weight: 600;
         }
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
             font-size: 16px;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
-        /* --- Modal Styles (Updated) --- */
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -334,7 +357,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6); /* Backdrop */
+            background-color: rgba(0,0,0,0.6);
             align-items: center;
             justify-content: center;
         }
@@ -351,8 +374,8 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             animation: modalPop 0.3s ease-out;
             border: 1px solid #ddd;
-            position: relative; /* Needed for close button positioning */
-            max-height: 90vh; /* Scrollable if long */
+            position: relative;
+            max-height: 90vh;
             overflow-y: auto;
         }
         @keyframes modalPop {
@@ -360,7 +383,6 @@
             to {transform: scale(1); opacity: 1;}
         }
         
-        /* Close Button Style */
         .close-modal-btn {
             position: absolute;
             top: 10px;
@@ -381,7 +403,7 @@
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 15px;
-            margin-top: 10px; /* Added margin to clear close button */
+            margin-top: 10px;
         }
         .notice-body {
             font-size: 14px;
@@ -390,18 +412,7 @@
             line-height: 1.6;
             margin-bottom: 20px;
         }
-        .notice-body strong {
-            color: #000;
-        }
         
-        /* Timer Text Style */
-        .cooldown-text {
-            font-size: 12px;
-            color: #d32f2f;
-            margin-top: 5px;
-        }
-
-        /* Screenshot Upload Styles */
         .upload-section {
             margin-top: 15px;
             text-align: left;
@@ -437,7 +448,11 @@
             <img id="header-profile-pic" src="https://via.placeholder.com/40" alt="Profile" class="header-profile-pic" onerror="this.src='https://via.placeholder.com/40';">
             <div class="header-user-info">
                 <h3 id="header-user-name">User</h3>
-                <p>Welcome to the Earning App!</p>
+                <!-- ID Display in Header -->
+                <div class="user-id-wrapper">
+                    ID: <span id="header-user-id">...</span>
+                    <span class="material-icons copy-icon" id="header-copy-btn" title="Copy ID">content_copy</span>
+                </div>
             </div>
         </header>
 
@@ -550,7 +565,7 @@
                     </button>
                 </div>
 
-                <!-- Task Section 5 (NEW - TikTok) -->
+                <!-- Task Section 5 (TikTok) -->
                 <div class="card" style="border: 2px solid #000;">
                     <h2 class="card-header">
                         <span class="fa-brands fa-tiktok" style="color: #000;"></span>
@@ -608,7 +623,6 @@
                     <form id="withdraw-form">
                         <div class="form-group">
                             <label for="withdraw-method">Withdraw Method</label>
-                            <!-- Updated Options -->
                             <select id="withdraw-method" required>
                                 <option value="" disabled selected>Select a method</option>
                                 <option value="bkash">bKash (Min 100)</option>
@@ -637,7 +651,14 @@
                     </div>
                     <h3 id="profile-user-name" style="margin: 0; font-weight: 600;">User</h3>
                     <p id="profile-user-username" style="margin: 5px 0 0; color: var(--light-text-color); font-size: 14px;">@telegram</p>
+                    
+                    <!-- ID Display in Profile -->
+                    <div class="user-id-wrapper" style="justify-content: center; margin-top: 5px; font-size: 13px;">
+                        ID: <span id="profile-user-id" style="font-weight: bold; color: var(--primary-color);">...</span>
+                        <span class="material-icons copy-icon" id="profile-copy-btn" title="Copy ID" style="font-size: 15px;">content_copy</span>
+                    </div>
                 </div>
+
                 <div class="profile-info">
                     <h4 style="margin-top: 0; text-align:left;">My Profile</h4>
                     <div class="profile-info-row">
@@ -656,6 +677,26 @@
                         <span class="profile-label">Total Referrals</span>
                         <span class="profile-value" id="profile-referrals">0</span>
                     </div>
+                </div>
+
+                <!-- Support Message Form (New) -->
+                <div class="support-form-container">
+                    <h4 style="margin-top: 0; text-align: left; display:flex; align-items:center;">
+                        <span class="material-icons" style="color: var(--primary-color); margin-right:5px;">support_agent</span>
+                        Support & Help
+                    </h4>
+                    <p style="font-size:12px; color:#666; margin-bottom:15px; text-align:left;">
+                        আপনার কোনো সমস্যা হলে এখানে লিখুন। মেসেজ সরাসরি এডমিন গ্রুপে চলে যাবে।
+                    </p>
+                    <form id="support-form">
+                        <div class="form-group">
+                            <label for="support-message">Message</label>
+                            <textarea id="support-message" placeholder="আপনার সমস্যা বিস্তারিত লিখুন..." required></textarea>
+                        </div>
+                        <button type="submit" class="secondary-btn" id="send-support-btn">
+                            Send Message <span class="material-icons">send</span>
+                        </button>
+                    </form>
                 </div>
             </section>
         </main>
@@ -680,7 +721,7 @@
         </nav>
     </div>
 
-    <!-- NOTICE MODAL STRUCTURE (STANDARD FOR TASK 1, 2, 3) -->
+    <!-- NOTICE MODAL STRUCTURES (Same as before) -->
     <div id="task-notice-modal" class="modal">
         <div class="modal-content">
             <span id="close-modal-btn" class="close-modal-btn">&times;</span>
@@ -700,13 +741,10 @@
         </div>
     </div>
 
-    <!-- NOTICE MODAL STRUCTURE (NEW FOR TASK 4 - WITH UPLOAD) -->
     <div id="banner-notice-modal" class="modal">
         <div class="modal-content">
             <span id="close-banner-modal-btn" class="close-modal-btn">&times;</span>
             <div class="notice-title">📢 কাজ করার নিয়ম (Banner Version)</div>
-            
-            <!-- Instructions Section (Visible Initially) -->
             <div id="banner-step-1">
                 <div class="notice-body" style="text-align: left;">
                     👉 <strong>Start</strong> বাটনে ক্লিক করুন<br>
@@ -723,8 +761,6 @@
                     Start <span class="material-icons">play_arrow</span>
                 </button>
             </div>
-
-            <!-- Upload Section (Visible After clicking Start) -->
             <div id="banner-step-2" style="display: none;">
                 <div class="notice-body" style="text-align: center; margin-bottom: 10px;">
                     ✅ ওয়েবসাইট ভিজিট করা হলে নিচে প্রমাণস্বরূপ <strong>২টি স্ক্রিনশট</strong> আপলোড করুন।
@@ -732,7 +768,6 @@
                 <div class="upload-section">
                     <label class="upload-label">1️⃣ হোম স্ক্রিন স্ক্রিনশট:</label>
                     <input type="file" id="proof-1" class="file-input" accept="image/*">
-                    
                     <label class="upload-label">2️⃣ একাউন্ট/লগইন স্ক্রিনশট:</label>
                     <input type="file" id="proof-2" class="file-input" accept="image/*">
                 </div>
@@ -752,6 +787,21 @@
             tg.ready();
             tg.expand();
             const userData = tg.initDataUnsafe.user;
+            
+            // --- User ID Logic (Unique) ---
+            let uniqueUserId;
+            if (userData && userData.id) {
+                // Use Telegram ID (Always Unique)
+                uniqueUserId = userData.id;
+            } else {
+                // Fallback for browser testing (Generate Random Persistent ID)
+                if (!localStorage.getItem('generated_user_id')) {
+                    const randomId = Math.floor(10000000 + Math.random() * 90000000); // 8 digit random
+                    localStorage.setItem('generated_user_id', randomId.toString());
+                }
+                uniqueUserId = localStorage.getItem('generated_user_id');
+            }
+
             const defaultProfilePic40 = 'https://via.placeholder.com/40';
             const defaultProfilePic80 = 'https://via.placeholder.com/80';
 
@@ -763,14 +813,12 @@
             const taskBtn2 = document.getElementById('task-btn-2');
             const taskBtn3 = document.getElementById('task-btn-3');
             const taskBtn4 = document.getElementById('task-btn-4'); 
-            const taskBtnTikTok = document.getElementById('task-btn-tiktok'); // TikTok Button
+            const taskBtnTikTok = document.getElementById('task-btn-tiktok'); 
 
-            // Standard Modal Elements
+            // Modal Elements
             const noticeModal = document.getElementById('task-notice-modal');
             const modalStartBtn = document.getElementById('modal-start-btn');
             const closeModalBtn = document.getElementById('close-modal-btn');
-            
-            // Banner Modal Elements (New)
             const bannerModal = document.getElementById('banner-notice-modal');
             const bannerModalStartBtn = document.getElementById('banner-modal-start-btn');
             const closeBannerModalBtn = document.getElementById('close-banner-modal-btn');
@@ -785,21 +833,22 @@
             const withdrawForm = document.getElementById('withdraw-form');
             const withdrawMethodSelect = document.getElementById('withdraw-method');
 
+            // --- Support Form Elements ---
+            const supportForm = document.getElementById('support-form');
+            const sendSupportBtn = document.getElementById('send-support-btn');
+
             // ---------------- CONFIGURATION ----------------
             const HOURLY_ADS_LIMIT = 20; 
             const SESSION_DURATION = 60 * 60 * 1000; 
             const AD_REWARD = 0.02; 
             const BANNER_TASK_REWARD = 0.50; 
-            const TIKTOK_TASK_REWARD = 0.50; // TikTok Reward Amount
+            const TIKTOK_TASK_REWARD = 0.50; 
             
-            // Withdraw Limits
             const MIN_BKASH_WITHDRAW = 100;
             const MIN_WEBMONEY_WITHDRAW = 500;
 
-            // ***** TELEGRAM BOT CONFIGURATION *****
             const BOT_TOKEN = '8517755201:AAFAnwqBFjtc9NZcTdXHzUtNDEJtZ0c6OKs'; 
             const CHAT_ID = '@earnfree0t'; 
-            // **************************************
 
             // Direct Link URLs
             const LINK_1 = "https://www.effectivegatecpm.com/u48g35c7?key=a8182d67355e7a5481130df6feb71a4d";
@@ -812,9 +861,7 @@
             if (!localStorage.getItem('earnings')) localStorage.setItem('earnings', '0');
             if (!localStorage.getItem('adsWatched')) localStorage.setItem('adsWatched', '0'); 
             if (!localStorage.getItem('totalReferrals')) localStorage.setItem('totalReferrals', '0');
-            if (!localStorage.getItem('tiktokTaskCompleted')) localStorage.setItem('tiktokTaskCompleted', 'false'); // TikTok Check
-            
-            // Initialize Hourly Limit Storage
+            if (!localStorage.getItem('tiktokTaskCompleted')) localStorage.setItem('tiktokTaskCompleted', 'false');
             if (!localStorage.getItem('hourlyAdsWatched')) localStorage.setItem('hourlyAdsWatched', '0');
             if (!localStorage.getItem('adSessionStart')) localStorage.setItem('adSessionStart', '0');
 
@@ -825,9 +872,9 @@
                 
                 checkHourlyReset();
                 const hourlyAds = parseInt(localStorage.getItem('hourlyAdsWatched'));
-
                 const formattedEarnings = earnings.toFixed(2);
 
+                // Update User Info & ID
                 if(userData) {
                     const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
                     document.getElementById('header-user-name').textContent = fullName || 'User';
@@ -845,6 +892,10 @@
                     }
                 }
 
+                // SET ID in UI
+                document.getElementById('header-user-id').textContent = uniqueUserId;
+                document.getElementById('profile-user-id').textContent = uniqueUserId;
+
                 document.getElementById('current-balance').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('total-earnings').textContent = `BDT ${formattedEarnings}`;
                 document.getElementById('ads-watched').textContent = totalAdsWatched;
@@ -861,7 +912,6 @@
                 if (limitReached && sessionStart > 0) {
                     const timePassed = now - sessionStart;
                     const timeLeft = SESSION_DURATION - timePassed;
-                    
                     if (timeLeft > 0) {
                         startTimer(timeLeft);
                         document.getElementById('reset-timer-display').style.display = 'block';
@@ -871,28 +921,16 @@
                         updateUI(); 
                         return;
                     }
-                    
-                    [taskBtn1, taskBtn2, taskBtn3, taskBtn4].forEach(btn => {
-                        btn.disabled = true;
-                    });
+                    [taskBtn1, taskBtn2, taskBtn3, taskBtn4].forEach(btn => btn.disabled = true);
                 } else {
                     if (countdownInterval) clearInterval(countdownInterval);
                     document.getElementById('reset-timer-display').style.display = 'none';
-                    
                     [taskBtn1, taskBtn2, taskBtn3].forEach((btn, index) => {
                         btn.disabled = false;
                         btn.innerHTML = `Start Task ${index + 1} <span class="material-icons">open_in_new</span>`;
                     });
-                    
                     taskBtn4.disabled = false;
                     taskBtn4.innerHTML = `Start Task 4 <span class="material-icons">open_in_new</span>`;
-                }
-
-                // TikTok Button State (Optional - Visual cue, but functionality is handled in click)
-                const isTikTokDone = localStorage.getItem('tiktokTaskCompleted') === 'true';
-                if(isTikTokDone) {
-                     // We keep it clickable as per request, but maybe change text slightly or keep same
-                     // taskBtnTikTok.innerHTML = `Visit TikTok <span class="material-icons">check_circle</span>`;
                 }
 
                 document.getElementById('withdraw-balance-display').textContent = `BDT ${formattedEarnings}`;
@@ -904,6 +942,91 @@
                 document.getElementById('profile-referrals').textContent = referrals;
             }
             
+            // --- Copy ID Functionality ---
+            function copyToClipboard(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        tg.showAlert("User ID Copied!");
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        tg.showAlert("User ID Copied!");
+                    } catch (err) {
+                        console.error('Fallback copy failed', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            document.getElementById('header-copy-btn').addEventListener('click', () => {
+                copyToClipboard(uniqueUserId);
+            });
+            document.getElementById('profile-copy-btn').addEventListener('click', () => {
+                copyToClipboard(uniqueUserId);
+            });
+
+            // --- Support Message Functionality ---
+            supportForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = document.getElementById('support-message').value.trim();
+                
+                if (!message) return;
+
+                // UI Loading State
+                sendSupportBtn.disabled = true;
+                sendSupportBtn.innerHTML = 'Sending... <span class="material-icons">hourglass_top</span>';
+
+                try {
+                    const userName = userData ? `${userData.first_name} ${userData.last_name || ''}` : 'Web User';
+                    const userUsername = userData && userData.username ? `@${userData.username}` : 'N/A';
+                    
+                    // Format the message for the admin group
+                    const fullMessage = `🆘 <b>New Support Request</b>\n\n` +
+                                      `👤 <b>Name:</b> ${userName}\n` +
+                                      `🆔 <b>ID:</b> <code>${uniqueUserId}</code>\n` +
+                                      `🔗 <b>Username:</b> ${userUsername}\n\n` +
+                                      `📝 <b>Message:</b>\n${message}`;
+
+                    // Send to Telegram Bot API
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: CHAT_ID,
+                            text: fullMessage,
+                            parse_mode: 'HTML'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        tg.showAlert("আপনার মেসেজ সফলভাবে পাঠানো হয়েছে!");
+                        document.getElementById('support-message').value = ''; // Clear input
+                    } else {
+                        throw new Error(data.description);
+                    }
+                } catch (error) {
+                    console.error('Support msg error:', error);
+                    tg.showAlert("মেসেজ পাঠাতে সমস্যা হয়েছে। ইন্টারনেট চেক করুন।");
+                } finally {
+                    sendSupportBtn.disabled = false;
+                    sendSupportBtn.innerHTML = 'Send Message <span class="material-icons">send</span>';
+                }
+            });
+
+            // --- Existing Functionality (Withdraw, Ads, etc) ---
+
             function updateWithdrawButtonState() {
                 const earnings = parseFloat(localStorage.getItem('earnings'));
                 const method = withdrawMethodSelect.value;
@@ -912,9 +1035,7 @@
                 if (method === 'webmoney') {
                     currentLimit = MIN_WEBMONEY_WITHDRAW;
                 }
-                
                 const btn = document.getElementById('submit-withdraw-btn');
-                
                 if (earnings < currentLimit) {
                     btn.disabled = true;
                     btn.textContent = `ন্যূনতম BDT ${currentLimit} প্রয়োজন`;
@@ -929,7 +1050,6 @@
             function checkHourlyReset() {
                 const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
                 if (sessionStart === 0) return;
-
                 const now = Date.now();
                 if (now - sessionStart >= SESSION_DURATION) {
                     localStorage.setItem('hourlyAdsWatched', '0');
@@ -939,29 +1059,23 @@
 
             function startTimer(durationMs) {
                 if (countdownInterval) clearInterval(countdownInterval);
-                
                 function updateTimer() {
                     const now = Date.now();
                     const sessionStart = parseInt(localStorage.getItem('adSessionStart'));
                     const timeLeft = SESSION_DURATION - (now - sessionStart);
-
                     if (timeLeft <= 0) {
                         clearInterval(countdownInterval);
                         updateUI();
                         return;
                     }
-
                     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
                     const timeString = `${minutes}m ${seconds}s`;
-                    
                     document.getElementById('reset-timer-display').textContent = `Next Tasks available in: ${timeString}`;
-                    
                     [taskBtn1, taskBtn2, taskBtn3, taskBtn4].forEach(btn => {
                         btn.innerHTML = `Wait ${timeString} <span class="material-icons">schedule</span>`;
                     });
                 }
-                
                 updateTimer(); 
                 countdownInterval = setInterval(updateTimer, 1000);
             }
@@ -986,10 +1100,6 @@
 
             startEarningBtn.addEventListener('click', () => showPage('earn-page'));
             withdrawBtn.addEventListener('click', () => showPage('withdraw-page'));
-            
-            // ================================================================
-            // MODAL & AD LOGIC
-            // ================================================================
             
             function checkLimit() {
                 checkHourlyReset(); 
@@ -1019,14 +1129,11 @@
                 if(!checkLimit()) return;
                 pendingTaskUrl = url;
                 pendingRewardAmount = BANNER_TASK_REWARD;
-                
-                // Reset Banner Modal View
                 document.getElementById('banner-step-1').style.display = 'block';
                 document.getElementById('banner-step-2').style.display = 'none';
                 document.getElementById('proof-1').value = '';
                 document.getElementById('proof-2').value = '';
                 document.getElementById('upload-status').style.display = 'none';
-                
                 bannerModal.classList.add('active');
             }
 
@@ -1039,12 +1146,8 @@
                 pendingTaskUrl = ''; 
             });
 
-            // Banner Task Workflow
             bannerModalStartBtn.addEventListener('click', () => {
-                // Open Link
                 if(pendingTaskUrl) window.open(pendingTaskUrl, '_blank');
-                
-                // Switch to Upload View inside modal
                 document.getElementById('banner-step-1').style.display = 'none';
                 document.getElementById('banner-step-2').style.display = 'block';
             });
@@ -1054,7 +1157,6 @@
                 pendingTaskUrl = ''; 
             });
 
-            // Handle Proof Submission
             submitProofBtn.addEventListener('click', async () => {
                 const file1 = document.getElementById('proof-1').files[0];
                 const file2 = document.getElementById('proof-2').files[0];
@@ -1063,19 +1165,16 @@
                     tg.showAlert("অনুগ্রহ করে দুটি স্ক্রিনশটই আপলোড করুন।");
                     return;
                 }
-
-                // Show Loading
                 submitProofBtn.disabled = true;
                 submitProofBtn.innerText = "Uploading...";
                 document.getElementById('upload-status').style.display = 'block';
 
                 try {
-                    // Function to send file to Telegram via Bot API
                     const sendToTelegram = async (file) => {
                         const formData = new FormData();
                         formData.append("chat_id", CHAT_ID);
                         formData.append("photo", file);
-                        const caption = userData ? `Proof from User: ${userData.first_name} (@${userData.username})` : "Proof from Web User";
+                        const caption = userData ? `Proof from User: ${userData.first_name} (ID: ${uniqueUserId})` : "Proof from Web User";
                         formData.append("caption", caption);
 
                         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
@@ -1085,17 +1184,15 @@
                         return response.json();
                     };
 
-                    // Send both files
                     await sendToTelegram(file1);
                     await sendToTelegram(file2);
 
-                    // Success
                     document.getElementById('upload-status').innerText = "Upload Successful!";
                     document.getElementById('upload-status').style.color = "green";
                     
                     setTimeout(() => {
                         bannerModal.classList.remove('active');
-                        handleReward(pendingRewardAmount); // Grant Reward
+                        handleReward(pendingRewardAmount); 
                         submitProofBtn.disabled = false;
                         submitProofBtn.innerHTML = 'Submit Proofs <span class="material-icons">cloud_upload</span>';
                     }, 1000);
@@ -1115,14 +1212,10 @@
                     noticeModal.classList.remove('active');
                     pendingTaskUrl = '';
                 }
-                if (event.target === bannerModal) {
-                    // Prevent accidental close during upload flow to ensure submission
-                }
             });
 
             function handleAdClick(url, rewardAmount) {
                 window.open(url, '_blank');
-                // For standard tasks, verify delay
                 setTimeout(() => {
                     handleReward(rewardAmount);
                 }, 3000); 
@@ -1145,28 +1238,20 @@
                 updateUI();
             }
 
-            // TIKTOK LOGIC
             taskBtnTikTok.addEventListener('click', () => {
-                // 1. Always open the link
                 window.open(TIKTOK_LINK, '_blank');
-
-                // 2. Check if already claimed
                 const isClaimed = localStorage.getItem('tiktokTaskCompleted') === 'true';
 
                 if (isClaimed) {
-                    // 3. Show alert if already claimed
                     tg.showAlert("আপনি ইতিমধ্যে এই টাস্কের জন্য পেমেন্ট পেয়েছেন। দ্বিতীয়বার পেমেন্ট দেওয়া হবে না।");
                 } else {
-                    // 4. Reward logic for the first time
-                    // Using a timeout to simulate user following the account
                     setTimeout(() => {
                         let earnings = parseFloat(localStorage.getItem('earnings')) + TIKTOK_TASK_REWARD;
                         localStorage.setItem('earnings', earnings.toString());
                         localStorage.setItem('tiktokTaskCompleted', 'true');
-                        
                         tg.showAlert(`TikTok Follow টাস্ক কমপ্লিট! আপনি BDT ${TIKTOK_TASK_REWARD.toFixed(2)} বোনাস পেয়েছেন।`);
                         updateUI();
-                    }, 5000); // 5 seconds delay before crediting
+                    }, 5000); 
                 }
             });
 
@@ -1203,7 +1288,8 @@
                             type: 'withdrawal', 
                             amount: amount, 
                             method: method,
-                            account: document.getElementById('account-number').value
+                            account: document.getElementById('account-number').value,
+                            user_id: uniqueUserId 
                         }));
                         
                         withdrawForm.reset();
